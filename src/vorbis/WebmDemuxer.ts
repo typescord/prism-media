@@ -1,14 +1,12 @@
-const WebmBaseDemuxer = require('../core/WebmBase');
+import { WebmBaseDemuxer } from '../core/WebmBase';
 
 const VORBIS_HEAD = Buffer.from('vorbis');
 
 /**
  * Demuxes a Webm stream (containing Vorbis audio) to output a Vorbis stream.
- * @memberof vorbis
- * @extends core.WebmBaseDemuxer
  */
-class WebmDemuxer extends WebmBaseDemuxer {
-  _checkHead(data) {
+export class WebmDemuxer extends WebmBaseDemuxer {
+  protected _checkHead(data: Buffer): void {
     if (data.readUInt8(0) !== 2 || !data.slice(4, 10).equals(VORBIS_HEAD)) {
       throw Error('Audio codec is not Vorbis!');
     }
@@ -18,5 +16,3 @@ class WebmDemuxer extends WebmBaseDemuxer {
     this.push(data.slice(3 + data.readUInt8(1) + data.readUInt8(2)));
   }
 }
-
-module.exports = WebmDemuxer;

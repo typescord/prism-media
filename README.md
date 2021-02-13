@@ -1,6 +1,6 @@
 <div align="center">
 
-**Originally from : https://github.com/amishshah/prism-media !**  
+**Originally from : https://github.com/amishshah/prism-media !**
 [![Build Status](https://github.com/typescord/prism-media/workflows/Tests/badge.svg)](https://github.com/typescord/opus/actions?query=workflow%3ATests)
 [![Patreon discord.js](https://img.shields.io/badge/donate-patreon-F96854.svg)](https://www.patreon.com/discordjs)
 
@@ -25,8 +25,8 @@ createReadStream('./audio.ogg')
 The example above can work with either a native or pure JavaScript Opus decoder - you don't need to worry about changing
 your code for whichever you install.
 
-- FFmpeg support (either through npm modules or a normal installation) 
-- Opus support (native or pure JavaScript)
+- FFmpeg support (either through npm modules or a normal installation)
+- Opus support (native)
 - Demuxing for WebM/OGG files (no modules required!)
 - Volume Altering (no modules required!)
 
@@ -35,31 +35,29 @@ your code for whichever you install.
 The following dependencies are all optional, and you should only install one from each category (the first listed in
 each category is preferred)
 
-- Opus
+- Opus :
   - [`@typescord/opus`](https://github.com/typescord/opus)
-  - [`@discordjs/opus`](https://github.com/discordjs/opus)
-  - [`opusscript`](https://github.com/abalabahaha/opusscript)
-- FFmpeg
+- FFmpeg :
   - [`ffmpeg-static`](http://npmjs.com/ffmpeg-static)
   - `ffmpeg` from a [normal installation](https://www.ffmpeg.org/download.html)
 
 ## Useful Links
 
 - [Documentation](https://hydrabolt.me/prism-media)
-- [Examples](https://github.com/amishshah/prism-media/tree/master/examples)
+- [Examples](https://github.com/typescord/prism-media/tree/main/examples)
 - [Patreon](https://www.patreon.com/discordjs)
 
 ## License
 
-> Copyright 2019 - 2021 Amish Shah  
+> Copyright 2019 - 2021 Amish Shah
 > Copyright 2021 Typescord
-> 
+>
 > Licensed under the Apache License, Version 2.0 (the "License");
 > you may not use this file except in compliance with the License.
 > You may obtain a copy of the License at
-> 
->    http://www.apache.org/licenses/LICENSE-2.0
-> 
+>
+> http://www.apache.org/licenses/LICENSE-2.0
+>
 > Unless required by applicable law or agreed to in writing, software
 > distributed under the License is distributed on an "AS IS" BASIS,
 > WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
