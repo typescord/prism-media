@@ -1,0 +1,27 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup Node.js v15
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test
+        run: yarn test
+
+      - name: Build
+        run: yarn build --noEmit

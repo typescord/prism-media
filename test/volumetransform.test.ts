@@ -1,17 +1,17 @@
-/* eslint-disable */
-
-const prism = require('../');
-const { streamToBuffer } = require('./util');
-const { Readable } = require('stream');
+import * as prism from '../src';
+import { streamToBuffer } from './util';
+import { Readable, ReadableOptions } from 'stream';
 
 class AudioSource extends Readable {
-  constructor(options) {
+  private readonly writeData: Buffer;
+
+  public constructor(options: ReadableOptions & { data: Buffer }) {
     super(options);
-    this._writeData = options.data;
+    this.writeData = options.data;
   }
 
-  _read() {
-    this.push(this._writeData);
+  public _read() {
+    this.push(this.writeData);
     this.push(null);
   }
 }
@@ -78,8 +78,9 @@ const fixtures32 = [
   },
 ];
 
-function writeBuffer(ints, format) {
-  let buffer;
+function writeBuffer(ints: number[], format: string): Buffer {
+  let buffer: Buffer;
+
   switch (format) {
     case 's16le':
       buffer = Buffer.allocUnsafe(ints.length * 2);
@@ -100,6 +101,7 @@ function writeBuffer(ints, format) {
     default:
       throw new Error(`Unknown type '${format}'`);
   }
+
   return buffer;
 }
 
@@ -111,14 +113,18 @@ test('Volume Transformers available', () => {
   expect(() => new prism.VolumeTransformer({ type: 'transformer boi' })).toThrow();
 });
 
-async function testVolume(type) {
-  let fixtures = fixturesAll.concat(type.includes('16') ? fixtures16 : fixtures32);
+async function testVolume(type: string) {
+  const fixtures = fixturesAll.concat(type.includes('16') ? fixtures16 : fixtures32);
+
   expect.assertions(fixtures.length);
+
   for (const { test, expected, volume } of fixtures) {
-    const output = new AudioSource({ data: writeBuffer(test, type) })
-      .pipe(new prism.VolumeTransformer({ type, volume }));
+    const output = new AudioSource({ data: writeBuffer(test, type) }).pipe(
+      new prism.VolumeTransformer({ type, volume }),
+    );
 
     const buffer = await streamToBuffer(output);
+
     expect(buffer).toEqual(writeBuffer(expected, type));
   }
 }

@@ -1,6 +1,7 @@
 // This example will demux an Opus-containing OGG file, decode the Opus packets to PCM and then write it to a file.
-const { opus } = require('@typescord/prism-media');
-const { createReadStream, createWriteStream } = require('fs');
+
+import { createReadStream, createWriteStream } from 'fs';
+import { opus } from '@typescord/prism-media';
 
 createReadStream('./audio.ogg')
   .pipe(new opus.OggDemuxer())

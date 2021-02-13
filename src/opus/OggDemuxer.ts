@@ -1,4 +1,4 @@
-const { Transform } = require('stream');
+import { Transform, TransformCallback, TransformOptions } from 'stream';
 
 const OGG_PAGE_HEADER_SIZE = 26;
 const STREAM_STRUCTURE_VERSION = 0;
@@ -9,23 +9,20 @@ const OPUS_TAGS = Buffer.from('OpusTag');
 
 /**
  * Demuxes an Ogg stream (containing Opus audio) to output an Opus stream.
- * @extends {TransformStream}
- * @memberof opus
  */
-class OggDemuxer extends Transform {
+export class OggDemuxer extends Transform {
+  private _remainder?: Buffer;
+  private _head?: Buffer;
+  private _bitstream?: number;
   /**
    * Creates a new OggOpus demuxer.
-   * @param {Object} [options] options that you would pass to a regular Transform stream.
-   * @memberof opus
+   * @param [options] options that you would pass to a regular Transform stream.
    */
-  constructor(options = {}) {
+  public constructor(options: TransformOptions = {}) {
     super({ readableObjectMode: true, ...options });
-    this._remainder = undefined;
-    this._head = undefined;
-    this._bitstream = undefined;
   }
 
-  _transform(chunk, encoding, done) {
+  public _transform(chunk: Buffer, encoding: BufferEncoding, done: TransformCallback): void {
     if (this._remainder) {
       chunk = Buffer.concat([this._remainder, chunk]);
       this._remainder = undefined;
@@ -33,8 +30,10 @@ class OggDemuxer extends Transform {
 
     while (chunk) {
       const result = this._readPage(chunk);
-      if (result) chunk = result;
-      else break;
+      if (!result) {
+        break;
+      }
+      chunk = result;
     }
     this._remainder = chunk;
     done();
@@ -42,12 +41,11 @@ class OggDemuxer extends Transform {
 
   /**
    * Reads a page from a buffer
-   * @private
-   * @param {Buffer} chunk the chunk containing the page
-   * @returns {boolean|Buffer} if a buffer, it will be a slice of the excess data of the original, otherwise it will be
+   * @param chunk the chunk containing the page
+   * @returns if a buffer, it will be a slice of the excess data of the original, otherwise it will be
    * false and would indicate that there is not enough data to go ahead with reading this page.
    */
-  _readPage(chunk) {
+  private _readPage(chunk: Buffer): Buffer | false {
     if (chunk.length < OGG_PAGE_HEADER_SIZE) {
       return false;
     }
@@ -58,20 +56,26 @@ class OggDemuxer extends Transform {
       throw Error(`stream_structure_version is not ${STREAM_STRUCTURE_VERSION}.`);
     }
 
-    if (chunk.length < 27) return false;
+    if (chunk.length < 27) {
+      return false;
+    }
     const pageSegments = chunk.readUInt8(26);
-    if (chunk.length < 27 + pageSegments) return false;
+    if (chunk.length < 27 + pageSegments) {
+      return false;
+    }
     const table = chunk.slice(27, 27 + pageSegments);
     const bitstream = chunk.readUInt32BE(14);
 
     const sizes = [];
     let totalSize = 0;
 
-    for (let i = 0; i < pageSegments;) {
+    for (let i = 0; i < pageSegments; ) {
       let size = 0;
       let x = 255;
       while (x === 255) {
-        if (i >= table.length) return false;
+        if (i >= table.length) {
+          return false;
+        }
         size += x = table.readUInt8(i);
         i++;
       }
@@ -79,15 +83,20 @@ class OggDemuxer extends Transform {
       totalSize += size;
     }
 
-    if (chunk.length < 27 + pageSegments + totalSize) return false;
+    if (chunk.length < 27 + pageSegments + totalSize) {
+      return false;
+    }
 
     let start = 27 + pageSegments;
     for (const size of sizes) {
       const segment = chunk.slice(start, start + size);
       const header = segment.slice(0, 8);
       if (this._head) {
-        if (header.equals(OPUS_TAGS)) this.emit('tags', segment);
-        else if (this._bitstream === bitstream) this.push(segment);
+        if (header.equals(OPUS_TAGS)) {
+          this.emit('tags', segment);
+        } else if (this._bitstream === bitstream) {
+          this.push(segment);
+        }
       } else if (header.equals(OPUS_HEAD)) {
         this.emit('head', segment);
         this._head = segment;
@@ -100,39 +109,22 @@ class OggDemuxer extends Transform {
     return chunk.slice(start);
   }
 
-  _destroy(err, cb) {
-    this._cleanup();
-    return cb ? cb(err) : undefined;
+  public _destroy(error: Error | null, callback: (error: Error | null) => void): void {
+    this.cleanup();
+    callback(error);
   }
 
-  _final(cb) {
-    this._cleanup();
-    cb();
+  public _final(callback: () => void): void {
+    this.cleanup();
+    callback();
   }
 
   /**
    * Cleans up the demuxer when it is no longer required.
-   * @private
    */
-  _cleanup() {
+  private cleanup() {
     this._remainder = undefined;
     this._head = undefined;
     this._bitstream = undefined;
   }
 }
-
-/**
- * Emitted when the demuxer encounters the opus head.
- * @event OggDemuxer#head
- * @memberof opus
- * @param {Buffer} segment a buffer containing the opus head data.
- */
-
-/**
- * Emitted when the demuxer encounters opus tags.
- * @event OggDemuxer#tags
- * @memberof opus
- * @param {Buffer} segment a buffer containing the opus tags.
- */
-
-module.exports = OggDemuxer;

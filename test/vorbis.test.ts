@@ -1,6 +1,4 @@
-/* eslint-disable */
-
-const { vorbis } = require('../');
+import { vorbis } from '../src';
 
 test('vorbis.WebmDemuxer available', () => {
   expect(vorbis.WebmDemuxer).toBeTruthy();
