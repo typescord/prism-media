@@ -1,6 +1,6 @@
 <div align="center">
 
-**Originally from : https://github.com/amishshah/prism-media !**
+**Originally from : https://github.com/amishshah/prism-media !**  
 [![Build Status](https://github.com/typescord/prism-media/workflows/Tests/badge.svg)](https://github.com/typescord/opus/actions?query=workflow%3ATests)
 [![Patreon discord.js](https://img.shields.io/badge/donate-patreon-F96854.svg)](https://www.patreon.com/discordjs)
 
