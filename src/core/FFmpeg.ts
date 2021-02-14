@@ -178,7 +178,7 @@ export class FFmpeg extends Duplex {
     for (const source of sources) {
       try {
         const command = typeof source === 'function' ? source() : source;
-        const result = spawnSync(command, ['-h'], { windowsHide: true });
+        const result = spawnSync(command, ['-h'], { windowsHide: true, shell: true });
 
         if (result.error) {
           throw result.error;
